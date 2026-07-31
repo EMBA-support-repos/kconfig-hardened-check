@@ -28,6 +28,11 @@ COLOR_END = '\x1b[0m'
 NUMBERS_IN_KVERSION = 3
 MIN_MAJOR_KVERSION = 2
 
+# Width of the table without the result column
+TABLE_WIDTH = 89
+# Width of the table columns
+COLUMN_WIDTH = [38, 7, 18, 10, 12, 30]
+
 
 def colorize_result(input_text: StrOrNone) -> StrOrNone:
     if input_text is None or not sys.stdout.isatty():
@@ -125,8 +130,13 @@ class OptCheck:
         else:
             self.result = f'FAIL: "{self.state}"'
 
-    def table_print(self, _mode: StrOrNone, with_results: bool) -> None:
-        print(f'{self.name:<38}|{self.opt_type:^7}|{self.reason:^18}|{self.decision:^10}|{self.expected:^12}', end='')
+    def table_print(self, _mode: StrOrNone, with_results: bool, offset: int) -> None:
+        print(' ' * offset, end='')
+        print(f'{self.name:<{COLUMN_WIDTH[0] - offset}}|', end='')
+        print(f'{self.opt_type:^{COLUMN_WIDTH[1]}}|', end='')
+        print(f'{self.reason:^{COLUMN_WIDTH[2]}}|', end='')
+        print(f'{self.decision:^{COLUMN_WIDTH[3]}}|', end='')
+        print(f'{self.expected:^{COLUMN_WIDTH[4]}}', end='')
         if with_results:
             print(f'| {colorize_result(self.result)}', end='')
 
@@ -210,9 +220,10 @@ class VersionCheck:
             return
         self.result = f'FAIL: version < {self.ver_expected}'
 
-    def table_print(self, _mode: StrOrNone, with_results: bool) -> None:
+    def table_print(self, _mode: StrOrNone, with_results: bool, offset: int) -> None:
         ver_req = f'kernel version >= {self.ver_expected}'
-        print(f'{ver_req:<89}', end='')
+        print(' ' * offset, end='')
+        print(f'{ver_req:<{TABLE_WIDTH - offset}}', end='')
         if with_results:
             print(f'| {colorize_result(self.result)}', end='')
 
@@ -245,18 +256,20 @@ class ComplexOptCheck:
     def check(self) -> None:
         raise NotImplementedError  # pragma: no cover
 
-    def table_print(self, mode: StrOrNone, with_results: bool) -> None:
+    def table_print(self, mode: StrOrNone, with_results: bool, offset: int) -> None:
         if mode == 'verbose':
             class_name = f'<<< {self.__class__.__name__} >>>'
-            print(f'    {class_name:85}', end='')
+            offset = 4
+            print(' ' * offset, end='')
+            print(f'{class_name:<{TABLE_WIDTH - offset}}', end='')
             if with_results:
                 print(f'| {colorize_result(self.result)}', end='')
             for o in self.opts:
                 print()
-                o.table_print(mode, with_results)
+                o.table_print(mode, with_results, 0)
         else:
             o = self.opts[0]
-            o.table_print(mode, False)
+            o.table_print(mode, False, offset)
             if with_results:
                 print(f'| {colorize_result(self.result)}', end='')
 
@@ -431,6 +444,31 @@ def override_expected_value(checklist: list[ChecklistObjType], name: str, new_va
 def perform_checks(checklist: list[ChecklistObjType]) -> None:
     for opt in checklist:
         opt.check()
+
+
+def table_header_print(with_results: bool) -> None:
+    sep_line_len = TABLE_WIDTH
+    if with_results:
+        sep_line_len += COLUMN_WIDTH[5]
+    print('=' * sep_line_len)
+    print(f'{"option_name":^{COLUMN_WIDTH[0]}}|', end='')
+    print(f'{"type":^{COLUMN_WIDTH[1]}}|', end='')
+    print(f'{"reason":^{COLUMN_WIDTH[2]}}|', end='')
+    print(f'{"decision":^{COLUMN_WIDTH[3]}}|', end='')
+    print(f'{"desired_val":^{COLUMN_WIDTH[4]}}', end='')
+    if with_results:
+        print('| check_result', end='')
+    print()
+    print('=' * sep_line_len)
+
+
+def table_separator_print(mode: StrOrNone, with_results: bool) -> None:
+    print()
+    sep_line_len = TABLE_WIDTH
+    if with_results:
+        sep_line_len += COLUMN_WIDTH[5]
+    if mode == 'verbose':
+        print('-' * sep_line_len)
 
 
 def print_unknown_options(checklist: list[ChecklistObjType], parsed_options: dict[str, str], opt_type: str) -> None:

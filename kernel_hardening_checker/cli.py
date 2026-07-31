@@ -36,6 +36,8 @@ from .engine import (
     perform_checks,
     populate_with_data,
     print_unknown_options,
+    table_header_print,
+    table_separator_print,
 )
 
 # The kernel-hardening-checker version format:
@@ -191,16 +193,7 @@ def print_checklist(mode: StrOrNone, checklist: list[ChecklistObjType], with_res
         print(json.dumps(output))
         return
 
-    # table header
-    sep_line_len = 89
-    if with_results:
-        sep_line_len += 30
-    print('=' * sep_line_len)
-    print(f'{"option_name":^38}|{"type":^7}|{"reason":^18}|{"decision":^10}|{"desired_val":^12}', end='')
-    if with_results:
-        print('| check_result', end='')
-    print()
-    print('=' * sep_line_len)
+    table_header_print(with_results)
 
     # table contents
     ok_count = 0
@@ -218,10 +211,8 @@ def print_checklist(mode: StrOrNone, checklist: list[ChecklistObjType], with_res
                 fail_count += 1
                 if mode == 'show_ok':
                     continue
-        opt.table_print(mode, with_results)
-        print()
-        if mode == 'verbose':
-            print('-' * sep_line_len)
+        opt.table_print(mode, with_results, 0)
+        table_separator_print(mode, with_results)
 
     # final score
     if with_results:
