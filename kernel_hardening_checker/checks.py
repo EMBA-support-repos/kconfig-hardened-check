@@ -783,8 +783,8 @@ def add_cmdline_checks(l: list[ChecklistObjType], arch: str) -> None:
                   CmdlineCheck('self_protection', 'defconfig', 'nopti', 'is not set'))]
     if arch == 'X86_64':
         l += [OR(CmdlineCheck('self_protection', 'kspp', 'cfi', 'kcfi'),
-                 AND(KconfigCheck('self_protection', 'a13xp0p0v', 'CFI_AUTO_DEFAULT', 'is not set'),
-                     KconfigCheck('self_protection', 'a13xp0p0v', 'CFI_AUTO_DEFAULT', 'is present'),
+                 AND(KconfigCheck('self_protection', 'kspp', 'CFI_AUTO_DEFAULT', 'is not set'),
+                     KconfigCheck('self_protection', 'kspp', 'CFI_AUTO_DEFAULT', 'is present'),
                      CmdlineCheck('-', '-', 'cfi', 'is not set')))]
 
     # 'self_protection', 'clipos'
