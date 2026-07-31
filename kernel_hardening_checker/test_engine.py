@@ -516,6 +516,9 @@ class TestEngine(unittest.TestCase):
                                  SysctlCheck('reason_6', 'decision_6', 'name_6', 'expected_6'))]
         config_checklist += [AND(KconfigCheck('reason_7', 'decision_7', 'NAME_7', 'expected_7'),
                                  VersionCheck((42, 43, 44)))]
+        config_checklist += [OR(KconfigCheck('reason_8', 'decision_8', 'NAME_8', 'expected_8'),
+                                AND(CmdlineCheck('reason_9', 'decision_9', 'name_9', 'expected_9'),
+                                    SysctlCheck('reason_10', 'decision_10', 'name_10', 'expected_10')))]
 
         # 2. prepare the parsed kconfig options
         parsed_kconfig_options = {}
@@ -525,10 +528,12 @@ class TestEngine(unittest.TestCase):
         parsed_cmdline_options = {}
         parsed_cmdline_options['name_2'] = 'expected_2'
         parsed_cmdline_options['name_5'] = 'UNexpected_5'
+        parsed_cmdline_options['name_9'] = 'expected_9'
 
         # 4. prepare the parsed sysctl options
         parsed_sysctl_options = {}
         parsed_sysctl_options['name_6'] = 'expected_6'
+        parsed_sysctl_options['name_10'] = 'expected_10'
 
         # 5. prepare the kernel version
         kernel_version = (42, 43, 43)
@@ -543,7 +548,8 @@ class TestEngine(unittest.TestCase):
                 json_result,
                 [{'option_name': 'CONFIG_NAME_1', 'type': 'kconfig', 'reason': 'reason_1', 'decision': 'decision_1', 'desired_val': 'expected_1', 'check_result': 'OK: name_2 is "expected_2"', 'check_result_bool': True},
                  {'option_name': 'CONFIG_NAME_4', 'type': 'kconfig', 'reason': 'reason_4', 'decision': 'decision_4', 'desired_val': 'expected_4', 'check_result': 'FAIL: name_5 is not "expected_5"', 'check_result_bool': False},
-                 {'option_name': 'CONFIG_NAME_7', 'type': 'kconfig', 'reason': 'reason_7', 'decision': 'decision_7', 'desired_val': 'expected_7', 'check_result': 'FAIL: version < (42, 43, 44)', 'check_result_bool': False}],
+                 {'option_name': 'CONFIG_NAME_7', 'type': 'kconfig', 'reason': 'reason_7', 'decision': 'decision_7', 'desired_val': 'expected_7', 'check_result': 'FAIL: version < (42, 43, 44)', 'check_result_bool': False},
+                 {'option_name': 'CONFIG_NAME_8', 'type': 'kconfig', 'reason': 'reason_8', 'decision': 'decision_8', 'desired_val': 'expected_8', 'check_result': 'OK: name_9 is "expected_9"', 'check_result_bool': True}],
         )
 
         stdout_result = []  # type: ResultType
@@ -553,7 +559,8 @@ class TestEngine(unittest.TestCase):
                 ['\
 CONFIG_NAME_1                         |kconfig|     reason_1     |decision_1| expected_1 | OK: name_2 is "expected_2"\
 CONFIG_NAME_4                         |kconfig|     reason_4     |decision_4| expected_4 | FAIL: name_5 is not "expected_5"\
-CONFIG_NAME_7                         |kconfig|     reason_7     |decision_7| expected_7 | FAIL: version < (42, 43, 44)'],
+CONFIG_NAME_7                         |kconfig|     reason_7     |decision_7| expected_7 | FAIL: version < (42, 43, 44)\
+CONFIG_NAME_8                         |kconfig|     reason_8     |decision_8| expected_8 | OK: name_9 is "expected_9"'],
         )
 
         stdout_result = []
@@ -571,7 +578,12 @@ CONFIG_NAME_7                         |kconfig|     reason_7     |decision_7| ex
  name_6                               |sysctl |     reason_6     |decision_6| expected_6 | OK\
 [AND]                                                                                    | FAIL: version < (42, 43, 44)\n\
  CONFIG_NAME_7                        |kconfig|     reason_7     |decision_7| expected_7 | None\n\
- kernel version >= (42, 43, 44)                                                          | FAIL: version < (42, 43, 44)'],
+ kernel version >= (42, 43, 44)                                                          | FAIL: version < (42, 43, 44)\
+[OR]                                                                                     | OK: name_9 is "expected_9"\n\
+ CONFIG_NAME_8                        |kconfig|     reason_8     |decision_8| expected_8 | FAIL: is not found\n\
+ [AND]                                                                                   | OK\n\
+  name_9                              |cmdline|     reason_9     |decision_9| expected_9 | OK\n\
+  name_10                             |sysctl |    reason_10     |decision_10|expected_10 | OK'],
         )
 
     def test_simple_value_overriding(self) -> None:
