@@ -192,7 +192,7 @@ def print_checklist(mode: StrOrNone, checklist: list[ChecklistObjType], with_res
         return
 
     # table header
-    sep_line_len = 91
+    sep_line_len = 89
     if with_results:
         sep_line_len += 30
     print('=' * sep_line_len)
@@ -222,10 +222,10 @@ def print_checklist(mode: StrOrNone, checklist: list[ChecklistObjType], with_res
         print()
         if mode == 'verbose':
             print('-' * sep_line_len)
-    print()
 
     # final score
     if with_results:
+        print()
         fail_suppressed = ''
         ok_suppressed = ''
         if mode == 'show_ok':
