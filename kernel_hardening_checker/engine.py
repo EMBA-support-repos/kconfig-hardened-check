@@ -258,15 +258,15 @@ class ComplexOptCheck:
 
     def table_print(self, mode: StrOrNone, with_results: bool, offset: int) -> None:
         if mode == 'verbose':
-            class_name = f'<<< {self.__class__.__name__} >>>'
-            offset = 4
+            class_name = f'[{self.__class__.__name__}]'
             print(' ' * offset, end='')
             print(f'{class_name:<{TABLE_WIDTH - offset}}', end='')
+            offset += 1
             if with_results:
                 print(f'| {colorize_result(self.result)}', end='')
             for o in self.opts:
                 print()
-                o.table_print(mode, with_results, 0)
+                o.table_print(mode, with_results, offset)
         else:
             o = self.opts[0]
             o.table_print(mode, False, offset)
