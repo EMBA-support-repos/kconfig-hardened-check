@@ -111,7 +111,7 @@ class OptCheck:
                 self.result = 'FAIL: is off, not found'
             elif self.state == 'off':
                 self.result = 'FAIL: is off'
-            elif 'off' in self.state.strip('"').split(','):  # noqa: SIM114
+            elif 'off' in self.state.strip('"').split(','):  # ruff: ignore [if-with-same-arms]
                 self.result = f'FAIL: is off ({self.state})'
             elif self.state in {'0', 'is not set'}:
                 self.result = f'FAIL: is off ({self.state})'
@@ -348,7 +348,7 @@ class AND(ComplexOptCheck):
                     self.result = f'FAIL: "{opt.expected.strip("*")}" is not in {opt.name}'
                 elif opt.result == 'FAIL: is not present':
                     self.result = f'FAIL: {opt.name} is not present'
-                elif opt.result == 'FAIL: is off':  # noqa: SIM114
+                elif opt.result == 'FAIL: is off':  # ruff: ignore [if-with-same-arms]
                     self.result = f'FAIL: {opt.name} is off'
                 elif opt.result.startswith('FAIL: is off ('):
                     self.result = f'FAIL: {opt.name} is off'
