@@ -320,7 +320,6 @@ def add_kconfig_checks(l: list[ChecklistObjType], arch: str) -> None:
     if arch == 'X86_64':
         l += [AND(KconfigCheck('self_protection', 'kspp', 'CFI_AUTO_DEFAULT', 'is not set'),
                   KconfigCheck('self_protection', 'kspp', 'CFI_AUTO_DEFAULT', 'is present'))]
-                  # consequence of 'cfi=kcfi' by kspp
         l += [OR(KconfigCheck('self_protection', 'kspp', 'MITIGATION_SLS', 'y'),
                  KconfigCheck('self_protection', 'kspp', 'SLS', 'y'))]
                  # this feature protects against CVE-2021-26341 in Straight-Line-Speculation
